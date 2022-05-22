@@ -122,7 +122,7 @@ while True:
                                     selected_words.append(dic_file['단어'][i])
                                     #print(dic_file['단어'][i])
                             complete=1 #complete 를 표시하기 위해 1로 변경한다
-                            print('debug1')
+                            
                             i=0
                             index = int(results[0][0])
                             word=''
@@ -146,9 +146,6 @@ while True:
         complete = 2
 
     if complete==2:
-        print('debug2')
-        
-
         if len(seq) < seq_length:
             continue
 
@@ -169,25 +166,34 @@ while True:
             continue
 
         this_action = '?'
-        
+        if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
+            continue
+
         if action_seq[-1] == action_seq[-2]== action_seq[-3]:
             this_action = action_seq[-1]
             action_seq[-1] = '?'
             action_seq[-2] = '?'
             action_seq[-3] = '?'
-        
+
         if this_action == 'next':
-            print("next")
+            
             next_cnt += 1
-            if next_cnt > 2 :
+            if next_cnt > 5 :
+                print("next")
                 next_cnt = 0
-                i+=1           
+                i+=1
+                if(i==len(selected_words)):
+                    i=0           
         elif this_action == 'prev':
-            print("previous")
+            
+            
             previous_cnt += 1
-            if previous_cnt > 2 :
+            if previous_cnt > 5 :
+                print("previous")
                 previous_cnt = 0
-                i-=1         
+                i-=1
+                if(i==-1):
+                    i=len(selected_words)-1         
         else:
             continue
         draw.text(((int(hand_landmarks.landmark[4].x* image.shape[1]) + int(hand_landmarks.landmark[8].x* image.shape[1]))/2 -40,
