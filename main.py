@@ -18,8 +18,6 @@ class App:
 
         self.gui = windowtk
         self.gui.geometry("1280x800")
-
-
         
         self.textLabel = []
         self.text = []
@@ -63,7 +61,8 @@ class App:
 ##########################################################################################################
 
 def update(gui):
-    global sentence, calced_dist, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, last_action
+    global sentence, calced_dist, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, last_action, i, word
+
     ret, image = cap.read()
     image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB) # OpenCV : BGR 사용, MediaPipe : RGB 사용
     result = hands.process(image) # 전처리 및 모델 추론을 함께 실행한다.
@@ -106,25 +105,24 @@ def update(gui):
                 if index != prev_index:
                     startTime = time.time()
                     prev_index = index
-                else:
-                    if time.time() - startTime > recognizeDelay:
-                        if index == 26:
-                            sentence += ' '
-                        elif index == 27:
-                            sentence = ''
-                        elif index == 25: #done동작(25) 하면 위에서 읽은 dic_file에서 sentence를 검색하고, 그 위치의 단어를 출력
-                            for i in range(0, dic_file.shape[0]):
-                                if (sentence == dic_file['초성'][i]):
-                                    selected_words.append(dic_file['단어'][i])
-                                    #print(dic_file['단어'][i])
-                            complete=1 #complete 를 표시하기 위해 1로 변경한다
-                            
-                            i=0
-                            # index = int(results[0][0])
-                            word=''
-                        if complete==0:
-                            sentence += gesture[index]
-                        startTime = time.time()
+                elif time.time() - startTime > recognizeDelay:
+                    if index == 26:
+                        sentence += ' '
+                    elif index == 27:
+                        sentence = ''
+                    elif index == 25: #done동작(25) 하면 위에서 읽은 dic_file에서 sentence를 검색하고, 그 위치의 단어를 출력
+                        for i in range(0, dic_file.shape[0]):
+                            if (sentence == dic_file['초성'][i]):
+                                selected_words.append(dic_file['단어'][i])
+                                #print(dic_file['단어'][i])
+                        complete=1 #complete 를 표시하기 위해 1로 변경한다
+                        
+                        i=0
+                        # index = int(results[0][0])
+                        word=''
+                    if complete==0:
+                        sentence += gesture[index]
+                    startTime = time.time()
                 if complete==0:
                     word = gesture[index]
                 draw.text((int(hand_landmarks.landmark[0].x*image.shape[1]),int(hand_landmarks.landmark[0].y*image.shape[0])), word, font=font, fill=(b, g, r, a))
@@ -143,7 +141,8 @@ def update(gui):
 
     if complete==2:
         if len(seq) < seq_length:
-            ret
+            gui.imageLabel.after(1, update, gui)
+            return
 
         input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
 
@@ -153,19 +152,21 @@ def update(gui):
         conf = y_pred[i_pred]
 
         if conf < 0.9:
-            ret
+            gui.imageLabel.after(1, update, gui)
+            return
 
         action = actions[i_pred]
         action_seq.append(action)
 
         if len(action_seq) < 3:
-            ret
+            gui.imageLabel.after(1, update, gui)
+            return
 
         this_action = '?'
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
 
-        if action_seq[-1] == action_seq[-2]== action_seq[-3]:
+        if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3]:
             this_action = action
             # action_seq[-1] = '?'
             # action_seq[-2] = '?'
@@ -191,8 +192,6 @@ def update(gui):
         draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
                    int(hand_landmarks.landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
         draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
-        
-        
 
         # draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
         #            int(hand_landmarks.landmark[0].y * image.shape[0])), str(math.trunc(calced_dist*100)), font=font, fill=(b, g, r, a))
@@ -204,9 +203,9 @@ def update(gui):
 
     cv2.waitKey(1)
     if keyboard.is_pressed('b'):
-        ret
+        return
     gui.draw(image)
-    gui.gui.after(33, update, gui)
+    gui.imageLabel.after(1, update, gui)
 
 
 def calc_dist(x1,y1,x2,y2):
@@ -270,6 +269,7 @@ complete = 0 #글씨 입력을 완료 했는지 확인하는 변수(done 동작�
 selected_words = []
 word=''
 calced_dist=0
+i = 0
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
