@@ -195,8 +195,8 @@ def update(gui):
                 if(i==-1):
                     i=len(selected_words)-1         
                     
-        draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
-                int(hand_landmarks.landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
+        draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
+                int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
         draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
 
 
