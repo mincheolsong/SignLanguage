@@ -64,7 +64,7 @@ class App:
 
 def update(gui):
     global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, i
-    global actions, seq_length, seq, action_seq, last_action
+    global actions, seq_length, seq, action_seq, last_action, word
     ret, image = cap.read()
     if not ret:
         return
@@ -147,33 +147,24 @@ def update(gui):
     if complete==2:
         if len(seq) < seq_length:
             return
-
         input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
-
         y_pred = model.predict(input_data).squeeze()
-
         i_pred = int(np.argmax(y_pred))
         conf = y_pred[i_pred]
-
         if conf < 0.9:
             return
-
         action = actions[i_pred]
         action_seq.append(action)
-
         if len(action_seq) < 3:
             return
-
         this_action = '?'
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
-
         if action_seq[-1] == action_seq[-2]== action_seq[-3]:
             this_action = action
             # action_seq[-1] = '?'
             # action_seq[-2] = '?'
             # action_seq[-3] = '?'
-
         if this_action == 'next':
             next_cnt += 1
             if next_cnt > 5 :
@@ -190,11 +181,11 @@ def update(gui):
                 i-=1
                 if(i==-1):
                     i=len(selected_words)-1         
-
+                    
         draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
-                   int(hand_landmarks.landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
+                int(hand_landmarks.landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
         draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
-        
+            
         
 
         # draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
