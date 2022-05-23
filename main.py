@@ -146,7 +146,7 @@ def update(gui):
         print(selected_words)
         complete = 2
 
-    if complete==2: # ★
+    if complete==2 and result.multi_hand_landmarks: # ★
         if len(seq) < seq_length:
             gui.imageLabel.after(1, update, gui)
             return
