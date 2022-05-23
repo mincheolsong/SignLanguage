@@ -62,16 +62,18 @@ class App:
 
 def update(gui):
 
-    global sentence, calced_dist, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, last_action, i, word
-
+    global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, last_action, i, word
 
     ret, image = cap.read()
+
     if not ret:
         return
+
     image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB) # OpenCV : BGR 사용, MediaPipe : RGB 사용
     result = hands.process(image) # 전처리 및 모델 추론을 함께 실행한다.
     img_pil = Image.fromarray(image)
     draw = ImageDraw.Draw(img_pil)
+
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks: # 여러개의 손을 인식 할 수 있으니까, for문 반복
             joint = np.zeros((21,4))
@@ -93,12 +95,13 @@ def update(gui):
 
             d = np.concatenate([joint.flatten(),angle]) # ★
             seq.append(d) # ★
+
             if keyboard.is_pressed('a'):
                 for num in angle:
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("25.000000")
+                f.write("25.000000") # 학습하고자 하는 손동작은 인덱스를 입력
                 f.write('\n')
                 print('next')
             data = np.array([angle],dtype=np.float32)
@@ -115,15 +118,13 @@ def update(gui):
                         sentence += ' '
                     elif index == 27:
                         sentence = ''
-                    elif index == 25: #done동작(25) 하면 위에서 읽은 dic_file에서 sentence를 검색하고, 그 위치의 단어를 출력
+                    elif index == 25: # done동작(25) 하면 위에서 읽은 dic_file에서 sentence를 검색하고, 그 위치의 단어를 출력
                         for i in range(0, dic_file.shape[0]):
                             if (sentence == dic_file['초성'][i]):
                                 selected_words.append(dic_file['단어'][i])
-                                #print(dic_file['단어'][i])
+                                
                         complete=1 #complete 를 표시하기 위해 1로 변경한다
-                        
                         i=0
-                        # index = int(results[0][0])
                         word=''
                     if complete==0:
                         sentence += gesture[index]
@@ -132,7 +133,7 @@ def update(gui):
                 if complete==0:
                     word = gesture[index]
                 draw.text((int(hand_landmarks.landmark[0].x*image.shape[1]),int(hand_landmarks.landmark[0].y*image.shape[0])), word, font=font, fill=(b, g, r, a))
-                # cv2.putText(image,gesture[index].upper(),(int(hand_landmarks.landmark[0].x*image.shape[1]-30),int(hand_landmarks.landmark[0].y*image.shape[0]-240)),cv2.FONT_HERSHEY_PLAIN,4,(0,0,0),4)
+                
             image = np.array(img_pil)
             mp_drawing.draw_landmarks(
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS
@@ -145,41 +146,39 @@ def update(gui):
         print(selected_words)
         complete = 2
 
-    if complete==2:
+    if complete==2: # ★
         if len(seq) < seq_length:
-
             gui.imageLabel.after(1, update, gui)
             return
-
 
         input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
         y_pred = model.predict(input_data).squeeze()
         i_pred = int(np.argmax(y_pred))
         conf = y_pred[i_pred]
-        if conf < 0.9:
 
+        if conf < 0.9:
             gui.imageLabel.after(1, update, gui)
             return
 
         action = actions[i_pred]
         action_seq.append(action)
-        if len(action_seq) < 3:
 
+        if len(action_seq) < 3:
             gui.imageLabel.after(1, update, gui)
             return
 
         this_action = '?'
+        
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
 
-        if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3]:
-
+        if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3]: # 같은 동작을 세번 연속하면 this_action으로 인식
             this_action = action
             # action_seq[-1] = '?'
             # action_seq[-2] = '?'
             # action_seq[-3] = '?'
         if this_action == 'next':
-            next_cnt += 1
+            next_cnt += 1 
             if next_cnt > 5 :
                 print("next")
                 next_cnt = 0
@@ -199,14 +198,6 @@ def update(gui):
                 int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
         draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
 
-
-
-        # draw.text((int(hand_landmarks.landmark[0].x * image.shape[1]),
-        #            int(hand_landmarks.landmark[0].y * image.shape[0])), str(math.trunc(calced_dist*100)), font=font, fill=(b, g, r, a))
-
-     #  이 쯤에서 단어 목록 중 하나를 선택하는 코드를 작성해야 할 거 같음
-    #print(sentence)
-    # cv2.putText(image,sentence,(20,440),cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255),3)
     image = np.array(img_pil)
 
     cv2.waitKey(1)
@@ -220,23 +211,22 @@ def update(gui):
 ################################################################################################################
 #main
 
-
+# ★ 표시는 움직이는 손 동작('next', 'prev')을 학습시키기 위한 코드
 
 gesture = {
     0:'ㄱ',1:'ㄴ',2:'ㄷ',3:'ㄹ',4:'ㅁ',5:'ㅂ',6:'ㅅ',7:'ㅇ',
     8:'ㅈ',9:'ㅊ',10:'ㅋ',11:'ㅌ',12:'ㅍ',13:'ㅎ',14:'next',
-    15:'prev',16:'q',17:'r',18:'s',19:'t',20:'u',21:'v',
-    22:'w',23:'x',24:'y',25:'done',26:'spacing',27:'clear'
+    15:'prev', 25:'done',26:'spacing',27:'clear'
 }
 actions = ['prev', 'next'] # ★
 seq_length = 30 # ★
-next_cnt = 0
-previous_cnt = 0
-model = load_model('models/model.h5') # ★
+next_cnt = 0 # ★
+previous_cnt = 0 # ★
+model = load_model('models/model.h5') # ★ 학습한 모델 load
         
 seq = [] # ★
 action_seq = [] # ★
-last_action = None
+last_action = None # ★
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -271,13 +261,11 @@ b,g,r,a = 0,0,0,0
 fontpath = "C:\Windows\Fonts\gulim.ttc"
 font = ImageFont.truetype(fontpath, 50)
 
-complete = 0 #글씨 입력을 완료 했는지 확인하는 변수(done 동작을 하면 1로 바꿈)
+complete = 0 # 글씨 입력을 완료 했는지 확인하는 변수(done 동작을 하면 1로 바꿈)
 selected_words = []
 word=''
 
-calced_dist=0
 i = 0
-
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
