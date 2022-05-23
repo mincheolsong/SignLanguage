@@ -102,7 +102,7 @@ def update(gui):
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("5.000000") # 학습하고자 하는 손동작은 인덱스를 입력
+                f.write("26.000000") # 학습하고자 하는 손동작은 인덱스를 입력
                 f.write('\n')
                 print('next')
             data = np.array([angle],dtype=np.float32)
@@ -127,7 +127,7 @@ def update(gui):
                         complete=1 #complete 를 표시하기 위해 1로 변경한다
                         i=0
                         word=''
-                    if complete==0:
+                    if complete==0 and index!=27 and index!=26:
                         sentence += gesture[index]
                     startTime = time.time()
 
@@ -198,10 +198,11 @@ def update(gui):
                     i=len(selected_words)-1
                 
         elif this_action == 'stop':
-            stop_cnt += 1 
-            if stop_cnt > 3 :
-                print("stop")
-                stop_cnt = 0
+            print("stop")
+            # stop_cnt += 1 
+            # if stop_cnt > 3 :
+            #     print("stop")
+            #     stop_cnt = 0
 
         if result.multi_hand_landmarks:            
             draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
