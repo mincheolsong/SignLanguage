@@ -17,27 +17,27 @@ class App:
         self.delay = 33
 
         self.gui = windowtk
-        self.gui.geometry("1280x800")
+        self.gui.geometry("1280x900")
+        self.imageLabel = Label(self.gui, text="GUI")
+        self.imageLabel.pack()
         
         self.textLabel = []
         self.text = []
         for i in range(0, 3) :  
-            self.text.append(str(i) + "가나다")
+            self.text.append("")
             self.textLabel.append(Label())
-            self.textLabel[i].pack(side="bottom", anchor="s")
-            self.textLabel[i].configure(text=self.text[i], font=('Arial', 25))
+            self.textLabel[i].pack(side="top", anchor="s")
+            self.textLabel[i].configure(text="", font=('Arial', 25))
         print(self.text)
-        self.imageLabel = Label(self.gui, text="GUI")
-        self.imageLabel.pack()
         
-        self.button = Button(
-            self.gui,
-            text='Clear',
-            padx=100, 
-            pady=80,
-            command=self.clear
-        )
-        self.button.pack(side="bottom", anchor="e")
+        # self.button = Button(
+        #     self.gui,
+        #     text='Clear',
+        #     padx=100, 
+        #     pady=80,
+        #     command=self.clear
+        # )
+        # self.button.pack(side="right", anchor="e")
 
     def draw(self, image):
         imgtk = ImageTk.PhotoImage(image = Image.fromarray(image)) # ImageTk 객체로 변환
@@ -45,7 +45,6 @@ class App:
         self.imageLabel.imgtk = imgtk
         self.imageLabel.configure(image=imgtk)
  
-
     def clear(self):
         self.text[0] = ""
         self.text[1] = ""
@@ -57,6 +56,11 @@ class App:
     def drawText(self, index ,text):
         self.text[index] = self.text[index] + str(text)
         self.textLabel[index].configure(text=self.text[index], font=('Arial', 25))
+
+    def ClaerAndDrawText(self, index ,text):
+        self.text[index] = str(text)
+        self.textLabel[index].configure(text=str(text), font=('Arial', 25))
+
 
 ##########################################################################################################
 
@@ -102,7 +106,7 @@ def update(gui):
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("26.000000") # 학습하고자 하는 손동작은 인덱스를 입력
+                f.write("13.000000") # 학습하고자 하는 손동작은 인덱스를 입력
                 f.write('\n')
                 print('next')
             data = np.array([angle],dtype=np.float32)
@@ -141,9 +145,11 @@ def update(gui):
             )
     img_pil = Image.fromarray(image)
     draw = ImageDraw.Draw(img_pil)
-    draw.text((20,400),sentence,font=font,fill=(b, g, r, a))
+    gui.ClaerAndDrawText(0, sentence)
+    #draw.text((20,400),sentence,font=font,fill=(b, g, r, a))
     if complete==1:
         print(sentence)
+        gui.ClaerAndDrawText(1,selected_words)
         print(selected_words)
         complete = 2
 
@@ -207,8 +213,8 @@ def update(gui):
         if result.multi_hand_landmarks:            
             draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
                     int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
-        draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
-        
+        #draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
+        gui.ClaerAndDrawText(2, str(selected_words[i]))
 
     image = np.array(img_pil)
 
