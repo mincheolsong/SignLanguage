@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 import time, os
 
-actions = ['prev', 'next']
+actions = ['prev', 'next','stop']
 seq_length = 30
 secs_for_action = 30
 

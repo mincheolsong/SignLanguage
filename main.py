@@ -62,7 +62,8 @@ class App:
 
 def update(gui):
 
-    global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt, model, last_action, i, word
+    global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt,stop_cnt, model, last_action, i, word
+    global action_seq, seq, actions, seq_length
 
     ret, image = cap.read()
 
@@ -146,7 +147,7 @@ def update(gui):
         print(selected_words)
         complete = 2
 
-    if complete==2 and result.multi_hand_landmarks: # ★
+    if complete==2: # ★
         if len(seq) < seq_length:
             gui.imageLabel.after(1, update, gui)
             return
@@ -167,12 +168,13 @@ def update(gui):
             gui.imageLabel.after(1, update, gui)
             return
 
+        
         this_action = '?'
         
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
 
-        if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3]: # 같은 동작을 세번 연속하면 this_action으로 인식
+        if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3] : # 같은 동작을 세번 연속하면 this_action으로 인식
             this_action = action
             # action_seq[-1] = '?'
             # action_seq[-2] = '?'
@@ -184,7 +186,8 @@ def update(gui):
                 next_cnt = 0
                 i+=1
                 if(i==len(selected_words)):
-                    i=0           
+                    i=0
+                         
         elif this_action == 'prev':
             previous_cnt += 1
             if previous_cnt > 5 :
@@ -192,11 +195,19 @@ def update(gui):
                 previous_cnt = 0
                 i-=1
                 if(i==-1):
-                    i=len(selected_words)-1         
-                    
-        draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
-                int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
+                    i=len(selected_words)-1
+                
+        elif this_action == 'stop':
+            stop_cnt += 1 
+            if stop_cnt > 3 :
+                print("stop")
+                stop_cnt = 0
+                
+        if result.multi_hand_landmarks:            
+            draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
+                    int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
         draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
+        
 
     image = np.array(img_pil)
 
@@ -218,10 +229,11 @@ gesture = {
     8:'ㅈ',9:'ㅊ',10:'ㅋ',11:'ㅌ',12:'ㅍ',13:'ㅎ',14:'next',
     15:'prev', 25:'done',26:'spacing',27:'clear'
 }
-actions = ['prev', 'next'] # ★
+actions = ['prev', 'next', 'stop'] # ★
 seq_length = 30 # ★
 next_cnt = 0 # ★
 previous_cnt = 0 # ★
+stop_cnt = 0 # ★
 model = load_model('models/model.h5') # ★ 학습한 모델 load
         
 seq = [] # ★

@@ -17,11 +17,13 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 actions = [
     'prev',
     'next',
+    'stop'
 ]
 
 data = np.concatenate([
-    np.load('dataset/seq_prev_1653112045.npy'),
-    np.load('dataset/seq_next_1653112045.npy'),
+    np.load('dataset/seq_prev_1653293844.npy'),
+    np.load('dataset/seq_next_1653293844.npy'),
+    np.load('dataset/seq_stop_1653293844.npy'),
 ], axis=0)
 
 print(data.shape)

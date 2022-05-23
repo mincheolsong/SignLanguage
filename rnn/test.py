@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 from tensorflow.keras.models import load_model
 
-actions = ['prev', 'next']
+actions = ['prev', 'next','stop']
 seq_length = 30
 
 model = load_model('models/model.h5')
