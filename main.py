@@ -102,7 +102,7 @@ def update(gui):
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("25.000000") # 학습하고자 하는 손동작은 인덱스를 입력
+                f.write("5.000000") # 학습하고자 하는 손동작은 인덱스를 입력
                 f.write('\n')
                 print('next')
             data = np.array([angle],dtype=np.float32)
@@ -202,7 +202,7 @@ def update(gui):
             if stop_cnt > 3 :
                 print("stop")
                 stop_cnt = 0
-                
+
         if result.multi_hand_landmarks:            
             draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
                     int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
@@ -226,8 +226,7 @@ def update(gui):
 
 gesture = {
     0:'ㄱ',1:'ㄴ',2:'ㄷ',3:'ㄹ',4:'ㅁ',5:'ㅂ',6:'ㅅ',7:'ㅇ',
-    8:'ㅈ',9:'ㅊ',10:'ㅋ',11:'ㅌ',12:'ㅍ',13:'ㅎ',14:'next',
-    15:'prev', 25:'done',26:'spacing',27:'clear'
+    8:'ㅈ',9:'ㅊ',10:'ㅋ',11:'ㅌ',12:'ㅍ',13:'ㅎ', 25:'done',26:'spacing',27:'clear'
 }
 actions = ['prev', 'next', 'stop'] # ★
 seq_length = 30 # ★
