@@ -69,50 +69,55 @@ def update(gui):
     global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt,stop_cnt, model, last_action, i, word
     global action_seq, seq, actions, seq_length
 
-    ret, image = cap.read()
+    ret, image = cap.read() # 캠 연결
 
-    if not ret:
+    if not ret: #연결확인
         return
 
     image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB) # OpenCV : BGR 사용, MediaPipe : RGB 사용
     result = hands.process(image) # 전처리 및 모델 추론을 함께 실행한다.
-    img_pil = Image.fromarray(image)
-    draw = ImageDraw.Draw(img_pil)
+    
+    img_pil = Image.fromarray(image) # 한글을 출력하기 위해 image를 변환(PIL라이브러리 사용)
+    draw = ImageDraw.Draw(img_pil) 
 
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks: # 여러개의 손을 인식 할 수 있으니까, for문 반복
-            joint = np.zeros((21,4))
-            for j, lm in enumerate(hand_landmarks.landmark):
+            joint = np.zeros((21,4)) # 손 관절 (joint) 넘파이 배열로 생성
+            for j, lm in enumerate(hand_landmarks.landmark): # media pipe의 landmark를 반복하며 joint에 대입
                 joint[j] = [lm.x,lm.y,lm.z,lm.visibility]
 
-            v1 = joint[[0,1,2,3,0,5,6,7,0, 9,10,11, 0,13,14,15, 0,17,18,19],:3]
+            v1 = joint[[0,1,2,3,0,5,6,7,0, 9,10,11, 0,13,14,15, 0,17,18,19],:3] # 벡터를 구하기 위해 생성하는 v1,v2 (v2에서 v2을 빼면 v백터가 된다)
             v2 = joint[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],:3]
 
             v = v2-v1
-            v = v / np.linalg.norm(v,axis=1)[:,np.newaxis]
+            v = v / np.linalg.norm(v,axis=1)[:,np.newaxis] # 정규화
 
-            compareV1 = v[[0,1,2,4,5,6,8,9,10,12,13,14,16,17,18],:]
+            compareV1 = v[[0,1,2,4,5,6,8,9,10,12,13,14,16,17,18],:] #각 벡터의 각도를 비교하기 위해 생성하는 compare벡터
             compareV2 = v[[1,2,3,5,6,7,9,10,11,13,14,15,17,18,19],:]
 
-            angle = np.arccos(np.einsum('nt,nt->n',compareV1,compareV2))
-
+            angle = np.arccos(np.einsum('nt,nt->n',compareV1,compareV2)) # compare벡터를 사용하여 각도를 구함
             angle = np.degrees(angle)
 
+            #############움직이는 동작('next', 'prev')을 위한 코드(RNN)###################
             d = np.concatenate([joint.flatten(),angle]) # ★
             seq.append(d) # ★
+            #############################################################################
 
-            if keyboard.is_pressed('a'):
+            if keyboard.is_pressed('a'): # gesture를 학습하기 위한 조건문(a키를 누르고 있으면 각도와 라벨이 test.txt에 write됨)
                 for num in angle:
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("13.000000") # 학습하고자 하는 손동작은 인덱스를 입력
+                f.write("13.000000") # 학습하고자 하는 손 동작의 인덱스를 입력
                 f.write('\n')
                 print('next')
+
             data = np.array([angle],dtype=np.float32)
 
-            ret, results, neighbours, dist = knn.findNearest(data,3)
+            ret, results, neighbours, dist = knn.findNearest(data,3) #knn알고리즘 적용
+
             index = int(results[0][0])
+            
             if index in gesture.keys():
                 if index != prev_index:
                     startTime = time.time()
