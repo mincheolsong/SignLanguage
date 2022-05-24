@@ -29,15 +29,6 @@ class App:
             self.textLabel[i].pack(side="top", anchor="s")
             self.textLabel[i].configure(text="", font=('Arial', 25))
         print(self.text)
-        
-        # self.button = Button(
-        #     self.gui,
-        #     text='Clear',
-        #     padx=100, 
-        #     pady=80,
-        #     command=self.clear
-        # )
-        # self.button.pack(side="right", anchor="e")
 
     def draw(self, image):
         imgtk = ImageTk.PhotoImage(image = Image.fromarray(image)) # ImageTk 객체로 변환
@@ -67,7 +58,7 @@ class App:
 def update(gui):
 
     global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt,stop_cnt, model, last_action, i, word
-    global action_seq, seq, actions, seq_length
+    global action_seq, seq, actions, seq_length, isStop, startActionTime
 
     ret, image = cap.read()
 
@@ -106,7 +97,7 @@ def update(gui):
                     num = round(num,6)
                     f.write(str(num))
                     f.write(',')
-                f.write("13.000000") # 학습하고자 하는 손동작은 인덱스를 입력
+                f.write("25.000000") # 학습하고자 하는 손동작은 인덱스를 입력
                 f.write('\n')
                 print('next')
             data = np.array([angle],dtype=np.float32)
@@ -149,13 +140,12 @@ def update(gui):
     #draw.text((20,400),sentence,font=font,fill=(b, g, r, a))
     if complete==1:
         print(sentence)
-        gui.ClaerAndDrawText(1,selected_words)
         print(selected_words)
         complete = 2
 
     if complete==2: # ★
         if len(seq) < seq_length:
-            gui.imageLabel.after(1, update, gui)
+            gui.imageLabel.after(100, update, gui)
             return
 
         input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
@@ -171,7 +161,7 @@ def update(gui):
         action_seq.append(action)
 
         if len(action_seq) < 3:
-            gui.imageLabel.after(1, update, gui)
+            gui.imageLabel.after(100, update, gui)
             return
 
         
@@ -179,12 +169,11 @@ def update(gui):
         
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
+        if action_seq[-1] != action_seq[-2]:
+            startActionTime = time.time()
 
         if action_seq[-1] == action_seq[-2] and action_seq[-2] == action_seq[-3] : # 같은 동작을 세번 연속하면 this_action으로 인식
             this_action = action
-            # action_seq[-1] = '?'
-            # action_seq[-2] = '?'
-            # action_seq[-3] = '?'
         if this_action == 'next':
             next_cnt += 1 
             if next_cnt > 5 :
@@ -204,17 +193,33 @@ def update(gui):
                     i=len(selected_words)-1
                 
         elif this_action == 'stop':
-            print("stop")
-            # stop_cnt += 1 
-            # if stop_cnt > 3 :
-            #     print("stop")
-            #     stop_cnt = 0
+            if time.time() - startActionTime > 2:
+                print(time.time())
+                print(startActionTime)
+                isStop = True
+                print("stop")
 
-        if result.multi_hand_landmarks:            
+        if result.multi_hand_landmarks:
             draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
                     int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
-        #draw.text((0,0,0,0),str(selected_words[i]),font=font,fill=(b,g,r,a))
-        gui.ClaerAndDrawText(2, str(selected_words[i]))
+        if not isStop:
+            printWords = list(selected_words)
+            if len(printWords) >= 9:
+                while printWords[4] != selected_words[i]:
+                    tmp = printWords[0]
+                    printWords.append(tmp)
+                    del printWords[0]
+                del printWords[9:]
+            else:
+                while len(selected_words) and selected_words[i] != printWords[int(len(printWords)/2)]:
+                    tmp = printWords[0]
+                    printWords.append(tmp)
+                    del printWords[0]
+            #print(printWords)
+            gui.ClaerAndDrawText(1,printWords)
+            gui.ClaerAndDrawText(2, str(selected_words[i]))
+        if isStop:
+            gui.ClaerAndDrawText(2, str(selected_words[i])+ " FIX")
 
     image = np.array(img_pil)
 
@@ -222,7 +227,7 @@ def update(gui):
     if keyboard.is_pressed('b'):
         return
     gui.draw(image)
-    gui.imageLabel.after(1, update, gui)
+    gui.imageLabel.after(100, update, gui)
 
 
 
@@ -279,10 +284,11 @@ b,g,r,a = 0,0,0,0
 fontpath = "C:\Windows\Fonts\gulim.ttc"
 font = ImageFont.truetype(fontpath, 50)
 
+startActionTime = 0;
 complete = 0 # 글씨 입력을 완료 했는지 확인하는 변수(done 동작을 하면 1로 바꿈)
 selected_words = []
 word=''
-
+isStop = False
 i = 0
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
