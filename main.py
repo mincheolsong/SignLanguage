@@ -1,4 +1,5 @@
 import math
+from pickle import TRUE
 
 import cv2
 import mediapipe as mp
@@ -58,7 +59,7 @@ class App:
 def update(gui):
 
     global sentence, selected_words, complete, font, fontpath, b,g,r,a, recognizeDelay, sentence, prev_index, startTime, cap, knn, label, angle,labelFile, angleFile, dic_file, file, f, hands, mp_hands, mp_drawing, gesture, next_cnt, previous_cnt,stop_cnt, model, last_action, i, word
-    global action_seq, seq, actions, seq_length, isStop, startActionTime
+    global action_seq, seq, actions, seq_length, isStop, startActionTime,  isPrint
 
     ret, image = cap.read() # 캠 연결
 
@@ -100,7 +101,7 @@ def update(gui):
                     f.write(str(num))
                     f.write(',')
 
-                f.write("13.000000") # 학습하고자 하는 손 동작의 인덱스를 입력
+                f.write("25.000000") # 학습하고자 하는 손 동작의 인덱스를 입력
 
                 f.write('\n')
                 print('next')
@@ -138,7 +139,7 @@ def update(gui):
                 draw.text((int(hand_landmarks.landmark[0].x*image.shape[1]),int(hand_landmarks.landmark[0].y*image.shape[0])), word, font=font, fill=(b, g, r, a))
                 
             image = np.array(img_pil)
-            mp_drawing.draw_landmarks(
+            mp_drawing.draw_landmarks( # mediapipe
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS
             )
     img_pil = Image.fromarray(image)
@@ -148,6 +149,7 @@ def update(gui):
     if complete==1:
         print(sentence)
         print(selected_words)
+        startActionTime = time.time()
         complete = 2
 
     if complete==2: # ★
@@ -155,11 +157,12 @@ def update(gui):
             gui.imageLabel.after(100, update, gui)
             return
 
-        input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
+        ##################################### RNN으로 학습#####################################
+        input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0) 
         y_pred = model.predict(input_data).squeeze()
         i_pred = int(np.argmax(y_pred))
         conf = y_pred[i_pred]
-
+        #######################################################################################
         if conf < 0.9:
             gui.imageLabel.after(1, update, gui)
             return
@@ -173,7 +176,6 @@ def update(gui):
 
         
         this_action = '?'
-        
         # if(hand_landmarks.landmark[0].x < 0.2 or hand_landmarks.landmark[0].x > 0.8):
         #     continue
         if action_seq[-1] != action_seq[-2]:
@@ -209,7 +211,7 @@ def update(gui):
         if result.multi_hand_landmarks:
             draw.text((int(result.multi_hand_landmarks[0].landmark[0].x * image.shape[1]),
                     int(result.multi_hand_landmarks[0].landmark[0].y * image.shape[0] + 20)), this_action , font=font, fill=(255,255,255))
-        if not isStop:
+        if not isStop and len(selected_words) != 0:
             printWords = list(selected_words)
             if len(printWords) >= 9:
                 while printWords[4] != selected_words[i]:
@@ -221,12 +223,13 @@ def update(gui):
                 while len(selected_words) and selected_words[i] != printWords[int(len(printWords)/2)]:
                     tmp = printWords[0]
                     printWords.append(tmp)
-                    del printWords[0]
+                    del printWords[0] 
             #print(printWords)
             gui.ClaerAndDrawText(1,printWords)
             gui.ClaerAndDrawText(2, str(selected_words[i]))
-        if isStop:
-            gui.ClaerAndDrawText(2, str(selected_words[i])+ " FIX")
+        if isStop and len(selected_words) != 0:
+            # gui.ClaerAndDrawText(1,printWords)
+                gui.ClaerAndDrawText(2, str(selected_words[i]))
 
     image = np.array(img_pil)
 
@@ -234,7 +237,7 @@ def update(gui):
     if keyboard.is_pressed('b'):
         return
     gui.draw(image)
-    gui.imageLabel.after(100, update, gui)
+    gui.imageLabel.after(35, update, gui)
 
 
 
@@ -297,7 +300,7 @@ selected_words = []
 word=''
 isStop = False
 i = 0
-
+isPrint = True
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 gui = App(Tk())
