@@ -18,9 +18,11 @@
 
 AI 모델 개발 및 수많은 데이터셋을 이용한 학습도 마친 사태로 제공되므로 라이브러리를 불러 사용하듯이 간편하게 호출하여 사용하기만 하면 되는 형태로, 비전 AI 기능을 개발 할 수 있다.
 
-[##_Image|kage@b29bAd/btsdOKKouKP/ODAnGSjoTaja1lrqKC0eJk/img.png|CDM|1.3|{"originWidth":640,"originHeight":338,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/1ad030e5-4606-4843-87e6-e9238dddbba8)  
 
-[##_Image|kage@bp6HN9/btsdOBs6pc1/r6m6HORI9eKzhaverC3zL0/img.png|CDM|1.3|{"originWidth":1280,"originHeight":446,"style":"alignLeft"}_##]
+
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/d4481667-d447-4eb9-9d2d-a3c38c2a24ce)  
+
 
   
  다음과 같이 손을 인식하여 준다.
@@ -40,7 +42,8 @@ knn은 최근접 이웃 알고리즘으로 _지도학습_ 알고리즘 중 하�
 
 새로운 데이터를 입력 받았을때, 해당 데이터와 가장 가까이에 있는 k개의 데이터를 확인해, 새로운 데이터의 특성을 파악하는 방법이다.
 
-[##_Image|kage@dkzkUP/btsdJpHlX8B/i4OTvb6xSMVGnMZkOKf5V0/img.png|CDM|1.3|{"originWidth":770,"originHeight":508,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/bdcbf06a-78f1-4444-839c-0104200ae968)  
+
 
   **위 그림에서 '?'의 주변에 가장 가깝고 많이 있는것이 무엇인가** 를 확인하여 '?'가 삼각형인지 원인지 판별하는 것이다.
 
@@ -59,7 +62,8 @@ knn은 최근접 이웃 알고리즘으로 _지도학습_ 알고리즘 중 하�
 
 RNN은 음성, 문자와 같이 순차적으로 진행하는 데이터 처리에 적합한 알고리즘 이다.
 
-[##_Image|kage@wGmsf/btsdJgXCNst/tAdRehSPFPMc7yCpKKVlZ1/img.png|CDM|1.3|{"originWidth":1280,"originHeight":335,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/6f625658-0e9e-460a-ab71-b796f8067d2e)  
+
 
  그림과 같이 hidden layer의 결과가 다시 hidden layer의 입력으로 들어가는 순환되는 구조를 가졌기 때문에 재귀 인공 신경망이라고 불린다.
 
@@ -69,7 +73,8 @@ RNN은 음성, 문자와 같이 순차적으로 진행하는 데이터 처리에
 
 ### 1\. media pipe가 제공해 주는 손의 joint를 활용하여 벡터사이의 각도를 구한다.
 
-[##_Image|kage@dmmxnl/btsdOMnTU9m/ObB2kB1Nw0FmfJUHle7ALk/img.png|CDM|1.3|{"originWidth":288,"originHeight":270,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/39b43368-692e-4f62-9289-73f19ed3d7b4)
+
 
 1️⃣ 점과 점사이의 뺄셈 연산을 통해 0번에서 1번으로 가는 벡터, 1번에서 2번으로 가는 벡터 등등 많은 벡터를 만들어낸다.
 
@@ -117,9 +122,10 @@ angle = np.degrees(angle)
  데이터 셋을 구하는 코드이다. 키보드 'a'키를 누르고 있으면 test.txt파일에 현재 각도와 손 동작의 라벨이 write된다.  
  
 
-이렇게 손 동작 하나하나에 대해서 구한 정보를 dataSet.txt파일에 붙여넣어 데이터셋을 완성하였다.
+이렇게 손 동작 하나하나에 대해서 구한 정보를 dataSet.txt파일에 붙여넣어 데이터셋을 완성하였다.  
 
-[##_Image|kage@50MZL/btsdPuAgUOV/kLhglmHcq6YRcN9tiLfUoK/img.png|CDM|1.3|{"originWidth":1280,"originHeight":660,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/c26a3924-573f-4007-8d49-5d5efd85cf32)  
+
 
 (수집한 데이터셋)
 
@@ -137,9 +143,11 @@ ret, results, neighbours, dist = knn.findNearest(data,3) #knn알고리즘 적용
 
 수행결과
 
-[##_Image|kage@TgwUO/btsdIpN3zOK/kQi49JQyIxe9bGQhQX5lXK/img.png|CDM|1.3|{"originWidth":800,"originHeight":639,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/4de15d6b-7d43-4706-96fb-a3158253d3f8)  
+  
 
-[##_Image|kage@sjOBA/btsdJgJ6pEk/UkVsvDLuSgqarjwdJhEIUK/img.png|CDM|1.3|{"originWidth":801,"originHeight":638,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/f3d2acfd-79c4-4d5d-a70e-4e5c28beb78e)  
+
 
   
 그림과 같이 손동작에 따른 자음이 잘 출력되었다.
@@ -210,7 +218,8 @@ seq_length = 30
 seq\_length=30, 즉 window 사이즈를 30으로 설정하였다.  
 _(최근 30개의 데이터를 보고 다음 데이터를 예측하게 된다)_
 
-[##_Image|kage@bGDkK7/btsdInQg3wN/pTPGL3Q8C4KadkwzQDErh1/img.png|CDM|1.3|{"originWidth":1117,"originHeight":654,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/fecd7854-c53d-466c-b9e2-939aa840b12e)  
+
 
 사진출처 : 빵형의 개발도상국 유튜브
 
@@ -321,11 +330,13 @@ history = model.fit(
 
 순서도
 
-[##_Image|kage@ccRswX/btsdJpm0UlR/UaqgQowmFcjCTKYoU0cE70/img.png|CDM|1.3|{"originWidth":1271,"originHeight":1037,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/05a19494-d5d5-4b1c-aa63-b5b1c949565d)  
+
 
 수행결과
 
-[##_Image|kage@lh68h/btsdKj08crj/Hduw06f5kqpNT2tU29BKkk/img.png|CDM|1.3|{"originWidth":1104,"originHeight":720,"style":"alignLeft"}_##]
+![image](https://github.com/mincheolsong/mincheolsong/assets/80660585/b9c3916b-d32b-4131-9d4c-97cd81b42562)
+
 
 ## 참조
 
